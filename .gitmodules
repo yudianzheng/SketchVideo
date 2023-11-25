@@ -1,3 +1,6 @@
 [submodule "layered-neural-atlases"]
 	path = layered-neural-atlases
 	url = https://github.com/ykasten/layered-neural-atlases.git
+[submodule "diffvg"]
+	path = diffvg
+	url = https://github.com/BachiLi/diffvg.git
