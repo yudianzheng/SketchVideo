@@ -1,3 +1,8 @@
+## Video Sketch Synthesis
+
+<a href='https://arxiv.org/abs/'><img src='https://img.shields.io/badge/ArXiv-2303.09535-red'></a> 
+<a href='https://sketchvideo.github.io/'><img src='https://img.shields.io/badge/Project-Page-Green'></a>
+
 if optimize the example, only (1)(5)
 
 (1)build up the environment: 
