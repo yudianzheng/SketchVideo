@@ -1,0 +1,40 @@
+if optimize the example, only (1)(5)
+
+(1)build up the environment: 
+
+the total training need projects of layer **neural layer atlas** and **diffvg**
+
+```
+<!-- install all and train from begining -->
+sh scripts/install.sh
+<!-- install diffvg(optimize the example) -->
+sh scripts/install_diffvg.sh
+```
+
+(2)download Dataset or take your own data(less than 70 frames,and extract masks), put on the folder <data>:
+
+```
+wget https://data.vision.ee.ethz.ch/csergi/share/davis/DAVIS-2017-Unsupervised-trainval-Full-Resolution.zip
+ 
+unzip DAVIS-2017-Unsupervised-trainval-Full-Resolution.zip
+```
+
+or using the examples data and extract the masks skip this step.
+
+(3)process/crop the data:
+
+```
+sh scripts/process_dataset.sh
+```
+
+(4)build up atlas:
+```
+sh scripts/operate_atlas.sh <video_name>
+```
+
+(5)compute clipavideo:
+```
+sh scripts/operate_clipavideo.sh <video_name>
+```
+
+Look at arguments.txt to see more arguments

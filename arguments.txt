@@ -1,0 +1,23 @@
+python crop.py: 
+--output_folder "the address of saving cropped images and masks"
+--mask_folder "the folder of videos' masks"
+--image_folder "the folder of videos' frames"
+--num_frames "the first <num_frames> images and masks"
+
+python preprocess_optical_flow.py: 
+--vid-path "the folder of images to compute optic flow"
+--max_long_edge "the size of saving optic flow images"
+
+
+python args.py:
+--data_folder "the folder of images to compute atlas"
+--evaluate_at "save the model and atlas of epoch at <evaluate_at>"
+--result_folder "the folder of saving the model and atlas"
+
+python run_object_sketching.py 
+--target_file "the folder name of saving results"
+--focus "compute the foreground or background"
+--data_folder "the data folder of images and masks" 
+--consist_param "the param of consistent loss"
+--num_strokes "the number of sketch strokes"
+--num_iter "the computing epoch"
