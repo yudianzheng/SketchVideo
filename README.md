@@ -4,7 +4,7 @@
 <a href='https://sketchvideo.github.io/'><img src='https://img.shields.io/badge/Project-Page-Green'></a>
 
 
-### Gettting Start
+### Getting Start
 if optimize the example, only (1)(5)
 
 ##### (1) build up the environment: 
