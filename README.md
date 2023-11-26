@@ -1,4 +1,4 @@
-## Video Sketch Synthesis
+## Sketch Video Synthesis
 
 <a href='https://arxiv.org/abs/'><img src='https://img.shields.io/badge/ArXiv-2303.09535-red'></a> 
 <a href='https://sketchvideo.github.io/'><img src='https://img.shields.io/badge/Project-Page-Green'></a>
