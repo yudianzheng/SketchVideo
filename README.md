@@ -12,13 +12,13 @@
 </table >
 
 ------------------
-## 💡 Abstract
-___Understanding semantic intricacies and high-level concepts is essential in image sketch generation, and this challenge becomes even more formidable when applied to the domain of videos. To address this, we propose a novel optimization-based framework for sketching videos represented by the frame-wise Bézier Curves. In detail, we first propose a cross-frame stroke initialization approach to warm up the location and the width of each curve. Then, we optimize the locations of these curves by utilizing a semantic loss based on CLIP features and a newly designed consistency loss using the self-decomposed 2D atlas network. Built upon these design elements, the resulting sketch video showcases impressive visual abstraction and temporal coherence. Furthermore, by transforming a video into SVG lines through the sketching process, our method unlocks applications in sketch-based video editing and video doodling, enabled through video composition, as exemplified in the teaser.___
+### 💡 Abstract
+Understanding semantic intricacies and high-level concepts is essential in image sketch generation, and this challenge becomes even more formidable when applied to the domain of videos. To address this, we propose a novel optimization-based framework for sketching videos represented by the frame-wise Bézier Curves. In detail, we first propose a cross-frame stroke initialization approach to warm up the location and the width of each curve. Then, we optimize the locations of these curves by utilizing a semantic loss based on CLIP features and a newly designed consistency loss using the self-decomposed 2D atlas network. Built upon these design elements, the resulting sketch video showcases impressive visual abstraction and temporal coherence. Furthermore, by transforming a video into SVG lines through the sketching process, our method unlocks applications in sketch-based video editing and video doodling, enabled through video composition, as exemplified in the teaser.
 
 ------------------
 
 ### 🚩 Getting Start
-if optimize the example, only (1)(5)
+if you only want to optimize the example, run (1) and (5).
 
 ##### (1) build up the environment: 
 
@@ -61,7 +61,7 @@ sh scripts/operate_clipavideo.sh <video_name>
 
 Look at arguments.txt to see more arguments
 
-#### Citation
+### Citation
 
 ```bibtex
 @article{zheng2023sketch,
@@ -74,3 +74,9 @@ Look at arguments.txt to see more arguments
 }
 
 ```
+
+### Acknowledgements
+
+The code is borrowed heavily from [CLIPasso](https://github.com/yael-vinker/CLIPasso) and [CLIPScene](https://github.com/yael-vinker/SceneSketch), thanks for their wonderful work!
+
+
