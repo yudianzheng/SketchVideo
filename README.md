@@ -2,7 +2,7 @@
 
 [Yudian Zheng](https://yudianzheng2018@gmail.com/), [Xiaodong Cun](http://vinthony.github.io/), [Menghan Xia](https://menghanxia.github.io/), [Chi-Man Pun](https://www.cis.um.edu.mo/~cmpun/)
 
-<a href='https://arxiv.org/abs/'><img src='https://img.shields.io/badge/ArXiv-2303.09535-red'></a> 
+<a href='https://arxiv.org/abs/2311.15306'><img src='https://img.shields.io/badge/ArXiv-2311-15306-red'></a> 
 <a href='https://sketchvideo.github.io/'><img src='https://img.shields.io/badge/Project-Page-Green'></a>
 <a href='https://www.youtube.com/watch?v=cVQERKS3Iqg'><img src='https://img.shields.io/badge/Youtube-Video-blue'></a>
 
@@ -59,3 +59,16 @@ sh scripts/operate_clipavideo.sh <video_name>
 
 Look at arguments.txt to see more arguments
 
+#### Citation
+
+```bibtex
+@article{zheng2023sketch,
+      title={Sketch Video Synthesis}, 
+      author={Yudian Zheng and Xiaodong Cun and Menghan Xia and Chi-Man Pun},
+      year={2023},
+      eprint={2311.15306},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV}
+}
+
+```
