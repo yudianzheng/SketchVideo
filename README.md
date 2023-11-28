@@ -39,7 +39,7 @@ wget https://data.vision.ee.ethz.ch/csergi/share/davis/DAVIS-2017-Unsupervised-t
 unzip DAVIS-2017-Unsupervised-trainval-Full-Resolution.zip
 ```
 
-or using the examples data and extract the masks skip this step.
+or using the examples data(car-turn) and extract the masks.
 
 ##### (3) process/crop the data:
 
