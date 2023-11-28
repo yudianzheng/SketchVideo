@@ -7,7 +7,7 @@
 <a href='https://www.youtube.com/watch?v=cVQERKS3Iqg'><img src='https://img.shields.io/badge/Youtube-Video-blue'></a>
 
 <table class="center">
-  <td><img src="gif/teaser.gif"></td>
+  <td><img src='https://github.com/yudianzheng/SketchVideo/assets/4397546/32df2a38-f3ed-470f-9cfb-78625388568b'></td>
 </tr>
 </table >
 
