@@ -25,7 +25,7 @@ if you only want to optimize the example, run (1) and (5).
 the total training need projects of layer **neural layer atlas** and **diffvg**
 
 ```bash
-# install all and train from begining
+# install all and train from beginning
 sh scripts/install.sh
 # install diffvg(optimize the example)
 sh scripts/install_diffvg.sh
