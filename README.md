@@ -1,4 +1,4 @@
-## Sketch Video Synthesis
+# Sketch Video Synthesis
 
 [Yudian Zheng](https://github.com/yudianzheng/) · [Xiaodong Cun](http://vinthony.github.io/) · [Menghan Xia](https://menghanxia.github.io/) · [Chi-Man Pun](https://www.cis.um.edu.mo/~cmpun/)
 
