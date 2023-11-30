@@ -8,8 +8,7 @@
 
 ### 🗺 Abstract
 <div>
-<img src='gif/teaser1.gif'>
-<!-- <img src='gif/teaser2.gif'> -->
+<img src='gif/teaser.gif'>
 </div>
 
 ------------------
