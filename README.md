@@ -6,10 +6,11 @@
 <a href='https://sketchvideo.github.io/'><img src='https://img.shields.io/badge/Project-Page-Green'></a>
 <a href='https://www.youtube.com/watch?v=cVQERKS3Iqg'><img src='https://img.shields.io/badge/Youtube-Video-blue'></a>
 
-<table class="center">
-  <td><img src='https://github.com/yudianzheng/SketchVideo/assets/4397546/32df2a38-f3ed-470f-9cfb-78625388568b'></td>
-</tr>
-</table >
+### 🗺 Abstract
+<div>
+<img src='gif/teaser1.gif'>
+<img src='gif/teaser2.gif'>
+</div>
 
 ------------------
 ### 💡 Abstract
