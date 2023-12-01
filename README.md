@@ -6,7 +6,7 @@
 <a href='https://sketchvideo.github.io/'><img src='https://img.shields.io/badge/Project-Page-Green'></a>
 <a href='https://www.youtube.com/watch?v=cVQERKS3Iqg'><img src='https://img.shields.io/badge/Youtube-Video-blue'></a>
 
-### 🗺 Abstract
+### 🗺 Showcases
 <div>
 <img src='gif/teaser.gif'>
 </div>
