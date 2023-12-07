@@ -4,7 +4,7 @@
 
 <a href='https://arxiv.org/abs/2311.15306'><img src='https://img.shields.io/badge/ArXiv-2311.15306-red'></a> 
 <a href='https://sketchvideo.github.io/'><img src='https://img.shields.io/badge/Project-Page-Green'></a>
-<a href='https://youtu.be/RA33ds1dg8I'><img src='https://img.shields.io/badge/Youtube-Video-blue'></a>
+<a href='https://https://youtu.be/tT9F1RSITuU'><img src='https://img.shields.io/badge/Youtube-Video-blue'></a>
 
 ### 🗺 Showcases
 <div>
