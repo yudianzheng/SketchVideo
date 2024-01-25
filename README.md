@@ -18,7 +18,7 @@ Understanding semantic intricacies and high-level concepts is essential in image
 ------------------
 
 ### 🚩 Getting Start
-if you only want to optimize the example, run (1) and (5).
+if you only want to optimize the example, run (1.2) and (5).
 
 ##### (1) build up the environment: 
 
@@ -27,7 +27,11 @@ the total training need projects of layer **neural layer atlas** and **diffvg**
 ```bash
 # install all and train from beginning
 sh scripts/install.sh
-# install diffvg(optimize the example)
+```
+```bash
+# (1.1) install NLA
+sh scripts/install_atlas.sh
+# (1.2) install diffvg(optimize the example models)
 sh scripts/install_diffvg.sh
 ```
 
@@ -52,6 +56,7 @@ sh scripts/process_dataset.sh
 ```bash
 sh scripts/operate_atlas.sh <video_name>
 ```
+The trained models should be located at 'data/dataset/<video_name>/results/<epoch_num>' and 'data/dataset/<video_name>/results/checkpoint'.
 
 ##### (5)compute our method:
 
