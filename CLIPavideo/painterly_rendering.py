@@ -260,7 +260,7 @@ def main(args):
 
     optimizer.init_optimizers()
 
-    print("--------")
+    # print("--------")
     print(args.device)
 
     init_file = torch.load(args.checkpoint_path)
