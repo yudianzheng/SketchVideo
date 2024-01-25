@@ -16,6 +16,7 @@ from IPython.display import Image as Image_colab
 from IPython.display import display, SVG, clear_output
 from ipywidgets import IntSlider, Output, IntProgress, Button
 import time
+from icecream import ic
 
 parser = argparse.ArgumentParser()
 
@@ -27,16 +28,25 @@ parser.add_argument("--focus", type=str,
                     help="background or foreground")
 parser.add_argument("--consist_param", type=float, default=1.5)
 parser.add_argument("--clip_param", type=float, default=200.0)
+parser.add_argument("--frames_param", type=float, default=0.001)
 parser.add_argument("--data_folder", type=str, help="data folder")
 parser.add_argument("--atlas_epoch", type=str, help="atlas epoch")
 parser.add_argument("--clip_model_name", type=str, default="RN101")
 parser.add_argument("--num_of_frames", type=str, default='-1')
-parser.add_argument("--text_target", type=str, default="none")
+parser.add_argument("--text", type=str, default="None")
+parser.add_argument("--device", type=str, default='0')
+parser.add_argument("--clip_conv_layer_weights",
+                            type=str, default="1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,0,0,0,0")
+parser.add_argument("--clip_RN_layer_weights",
+                    type=str, default="0,0,1.0,1.0,0")
+parser.add_argument("--clip_fc_loss_weight", type=str, default="0.1")
+parser.add_argument("--width", type=str,
+                        default="1.5", help="stroke width")
 
 parser.add_argument("--num_strokes", type=int, default=16,
                     help="number of strokes used to generate the sketch, this defines the level of abstraction.")
-parser.add_argument("--num_iter", type=int, default=2001, help="number of iterations")
-parser.add_argument("--iter", type=str, default="050000", help="which checkpoint") # no use
+parser.add_argument("--num_iter", type=int, default=2001,
+                    help="number of iterations")
 parser.add_argument("--fix_scale", type=int, default=0,
                     help="if the target image is not squared, it is recommended to fix the scale")
 parser.add_argument("--mask_object", type=int, default=0,
@@ -94,25 +104,34 @@ exit_codes = []
 manager = mp.Manager()
 losses_all = manager.dict()
 
-if args.focus == "foreground":
-  address_ = str(args.data_folder+"/imgs_crop_fore/")
+if args.focus == "foreground" or args.focus == "atlas":
+  address_frames = str(args.data_folder+"/imgs_crop_fore/")
 elif args.focus == "background":
-  address_ = str(args.data_folder+"/imgs_bg_crop/")
+  address_frames = str(args.data_folder+"/imgs_bg_crop/")
+
+address_masks = str(args.data_folder+"/masks_crop/")
 
 def run(seed, wandb_name):
     exit_code = sp.run(["python", "painterly_rendering.py", target,
                             "--focus", str(args.focus),
-                            "--frames_dir", address_,
+                            "--frames_dir", address_frames,
+                            "--masks_dir", address_masks,
+                            "--text", args.text,
                             "--num_of_frames", args.num_of_frames,
                             "--checkpoint_path", str(args.data_folder+"/results/checkpoint"),
                             "--clip_param", str(args.clip_param),
                             "--consist_param", str(args.consist_param),
-                            "--atlas_bg_dir", str(args.data_folder+f"/results/{args.atlas_epoch}/texture_orig1.png"),
-                            "--atlas_fore_dir", str(args.data_folder+f"/results/{args.atlas_epoch}/texture_orig2.png"),
+                            "--frames_param", str(args.frames_param),
+                            "--atlas_bg_dir", str(args.data_folder+f"/results/{args.atlas_epoch}/texture_orig2.png"),
+                            "--atlas_fore_dir", str(args.data_folder+f"/results/{args.atlas_epoch}/texture_orig1.png"),
                             "--clip_model_name", str(args.clip_model_name),
-                            "--text_target", str(args.text_target),
                             "--num_paths", str(args.num_strokes),
                             "--output_dir", output_dir,
+                            "--clip_conv_layer_weights", args.clip_conv_layer_weights,
+                            "--clip_RN_layer_weights", args.clip_RN_layer_weights,
+                            "--clip_fc_loss_weight", args.clip_fc_loss_weight,
+                            "--width", args.width,
+                            "--device", args.device,
                             "--wandb_name", wandb_name,
                             "--num_iter", str(num_iter),
                             "--save_interval", str(save_interval),

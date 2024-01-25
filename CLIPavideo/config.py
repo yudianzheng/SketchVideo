@@ -6,6 +6,8 @@ import numpy as np
 import pydiffvg
 import torch
 import wandb
+import glob
+from icecream import ic
 
 
 def set_seed(seed):
@@ -28,13 +30,16 @@ def parse_arguments():
     parser.add_argument("--num_of_frames", type=int, default=-1)
     # parser.add_argument("--frames_dir", type=str, default="data/car-turn/car-turn_bg/")
     parser.add_argument("--frames_dir", type=str, default="data/car-turn/car-turn_filtered/")
+    parser.add_argument("--masks_dir", type=str, default="data/car-turn/car-turn_filtered/")
     parser.add_argument("--flow_dir", type=str, default="data/car-turn/car-turn_crop_flow/")
     parser.add_argument("--checkpoint_path", type=str, default="MLP_models/checkpoints/car-turn_checkpoint")
-    parser.add_argument("--dist_param", type=float, default=0.005)
+    # parser.add_argument("--dist_param", type=float, default=0.005)
     parser.add_argument("--consist_param", type=float, default=1.5)
     parser.add_argument("--clip_param", type=float, default=200.0)
+    parser.add_argument("--frames_param", type=float, default=0.01)
     parser.add_argument("--atlas_bg_dir", type=str, default="data/car-turn/car-turn_crop_atlas_bg.png")
     parser.add_argument("--atlas_fore_dir", type=str, default="data/car-turn/car-turn_crop_atlas_fore.png")
+    parser.add_argument("--device", type=str, default="0")
 
     # =================================
     # ============ general ============
@@ -121,19 +126,21 @@ def parse_arguments():
                         help="if True, use L1 regularization on stroke's opacity to encourage small number of strokes")
     parser.add_argument("--clip_conv_loss", type=float, default=1)
     parser.add_argument("--clip_conv_loss_type", type=str, default="L2")
+    # parser.add_argument("--clip_conv_layer_weights",
+                        # type=str, default="0,0,1.0,1.0,0")
     parser.add_argument("--clip_conv_layer_weights",
-                        type=str, default="0,0,1.0,1.0,0")
-    parser.add_argument("--clip_text_layer_weights",
+                            type=str, default="1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,0,0,0,0")
+    parser.add_argument("--clip_RN_layer_weights",
                         type=str, default="0,0,1.0,1.0,0")
     parser.add_argument("--clip_model_name", type=str, default="RN101")
     # parser.add_argument("--clip_model_name", type=str, default="ViT-B/32")
     parser.add_argument("--clip_fc_loss_weight", type=float, default=0.1)
-    parser.add_argument("--clip_text_fc_loss_weight", type=float, default=0.1)
+    parser.add_argument("--clip_text_weight", type=float, default=0.0)
     parser.add_argument("--clip_text_guide", type=float, default=0)
     parser.add_argument("--text_target", type=str, default="none")
+    parser.add_argument("--text", type=str, default="None")
 
     args = parser.parse_args()
-    
     if args.num_of_frames == -1:
         args.num_of_frames = len(glob.glob(os.path.join(args.frames_dir, '*.jpg'))) + len(glob.glob(os.path.join(args.frames_dir, '*.png')))
     if args.num_of_frames > len(glob.glob(os.path.join(args.frames_dir, '*.jpg'))) + len(glob.glob(os.path.join(args.frames_dir, '*.png'))):
@@ -141,13 +148,15 @@ def parse_arguments():
         args.num_of_frames = len(glob.glob(os.path.join(args.frames_dir, '*.jpg'))) + len(glob.glob(os.path.join(args.frames_dir, '*.png')))
 
     ic(args.num_of_frames)
-    
     set_seed(args.seed)
 
     args.clip_conv_layer_weights = [
         float(item) for item in args.clip_conv_layer_weights.split(',')]
-    args.clip_text_layer_weights = [
-        float(item) for item in args.clip_text_layer_weights.split(',')]
+    if args.clip_model_name == "RN101":
+        args.clip_conv_layer_weights = [
+            float(item) for item in args.clip_RN_layer_weights.split(',')]
+    # args.text_layer_weights = [
+    #     float(item) for item in args.text_layer_weights.split(',')]
 
     args.output_dir = os.path.join(args.output_dir, args.wandb_name)
     if not os.path.exists(args.output_dir):
@@ -165,7 +174,7 @@ def parse_arguments():
                    config=args, name=args.wandb_name, id=wandb.util.generate_id())
 
     if args.use_gpu:
-        args.device = torch.device("cuda" if (
+        args.device = torch.device(f"cuda:{int(args.device)}" if (
             torch.cuda.is_available() and torch.cuda.device_count() > 0) else "cpu")
         # args.device = torch.device("cuda:0" if (
         #     torch.cuda.is_available() and torch.cuda.device_count() > 0) else "cpu")

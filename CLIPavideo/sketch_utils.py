@@ -16,6 +16,8 @@ from torchvision.utils import make_grid
 from skimage.transform import resize
 
 from U2Net_.model import U2NET
+import cv2
+import random
 
 
 def imwrite(img, filename, gamma=2.2, normalize=False, use_wandb=False, wandb_name="", step=0, input_im=None):
@@ -72,6 +74,31 @@ def log_input(inputs, output_dir):
     input_ = (input_ - input_.min()) / (input_.max() - input_.min())
     input_ = (input_ * 255).astype(np.uint8)
     imageio.imwrite("{}/{}.png".format(output_dir, "input"), input_)
+
+def save_atlas(atlas, model, frames_shape, points, colors, size, output_dir, device):
+    
+    tensor_image = ((atlas[0] - atlas[0].min()) / (atlas[0].max() - atlas[0].min())).squeeze(0).cpu()
+    atlas_s = (tensor_image * 255).clamp(0, 255).byte().permute(1, 2, 0).numpy()
+    cv2.imwrite("output_atlas1.png", atlas_s)
+    atlas_b = cv2.resize(atlas_s, (size,size))
+    # cv2.imwrite("output_atlas.png", atlas_b)
+    for i in range(len(frames_shape)):
+        for j, point in enumerate(points):
+            pos = model(torch.cat((frames_shape[i][point].points[0]/(224/2)-1, torch.tensor(i/(len(frames_shape)/2)-1).unsqueeze(0).to(device))))
+            # pos = model(torch.cat(frames_shape[i][j].points[0], i/len(frames_shape)))
+            pos = np.floor((pos.cpu().detach().numpy()+1)*(size/2)).astype(np.int)
+            # print(pos[0])
+            # print(pos[1])
+            # print(atlas_b.shape)
+            atlas_b[pos[1]-20: pos[1]+20, pos[0]-20: pos[0]+20,:] = colors[j]
+            # atlas_b[pos] = colors[j]
+            # frames_shape[i][points].points[0]
+            # sliced_list = [frames_shape[i][j] for j in points]
+
+    pil_image = Image.fromarray(atlas_b)
+    pil_image.save(output_dir)
+
+    return 0
 
 def save_sketches_video(sketches, output_dir, title):
     if not os.path.exists(output_dir):

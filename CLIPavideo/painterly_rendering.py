@@ -37,7 +37,7 @@ from icecream import ic
 from torch import nn
 from natsort import natsorted
 
-def load_renderer(args, target_im=None, atlas=None, ratio=None, optic_flow=None, mask=None):
+def load_renderer(args, target_im=None, ratio=None, atlas=None, optic_flow=None, mask=None):
     renderer = Painter(num_strokes=args.num_paths, args=args,
                        num_segments=args.num_segments,
                        imsize=args.image_scale,
@@ -45,7 +45,8 @@ def load_renderer(args, target_im=None, atlas=None, ratio=None, optic_flow=None,
                        target_im=target_im,
                        ratio=ratio,
                        atlas = atlas,
-                       optic_flow = optic_flow)
+                       optic_flow = optic_flow,
+                       mask=mask)
     renderer = renderer.to(args.device)
     return renderer
 
@@ -144,6 +145,7 @@ def get_atlas(args):
     atlas = []
     # atlas_bg = Image.open(args.atlas_bg_dir)
     atlas_fore = Image.open(args.atlas_fore_dir)
+    ic(args.atlas_fore_dir)
     if atlas_fore.mode == "RGBA":
         # Create a white rgba background
         new_fore = Image.new("RGBA", atlas_fore.size, "WHITE")
@@ -168,9 +170,16 @@ def get_atlas(args):
     data_transforms = transforms.Compose(transforms_)
     atlas_fore_ = data_transforms(atlas_fore).unsqueeze(0).to(args.device)
     # atlas_bg_ = data_transforms(atlas_bg).unsqueeze(0).to(args.device)
-    # atlas.append(atlas_fore_)
+    # if (atlas_fore_[:, :, :, :] < 5).any(dim=1):
+    #     atlas_fore_[:, :, :, :] = 255
+    mask = (atlas_fore_.mean(dim=1, keepdim=True) < 0.01)
+    # atlas_fore_ = atlas_fore_ * (1-mask) + 1 * mask
+    atlas_fore_[mask.expand_as(atlas_fore_)] = 1
+    # # atlas_fore_
+
+    atlas.append(atlas_fore_)
     # atlas.append(atlas_bg_)
-    return atlas_fore_
+    return atlas
 
 def main(args):
     if args.text == "None":
@@ -190,15 +199,20 @@ def main(args):
     ic(args.clip_model_name)
     # ic(args.text_layer_weights)
     ic(args.clip_text_weight)
+    ic(args.clip_fc_loss_weight)
+    ic(args.width)
+    
+    visual_point = random.choices(range(0, args.num_paths), k=15)
+    colors = []
+    for _ in range(len(visual_point)):
+        color = [random.randrange(0, 256) for _ in range(3)]
+        # color = [255,0,0]
+        colors.append(color)
 
     loss_func = Loss(args)
     # inputs = torch.vstack(get_frames(args))
     inputs = get_frames(args)
     atlas = get_atlas(args)
-    masks = get_masks(args)
-    max_mask = torch.max(torch.sum((torch.vstack(inputs)<1).reshape(args.num_of_frames,-1), dim=1))
-    mask_ratio = torch.sqrt(torch.sum((torch.vstack(inputs)<1).reshape(args.num_of_frames,-1),dim=1) / max_mask)
-
     masks = get_masks(args)
     max_mask = torch.max(torch.sum((torch.vstack(inputs)<1).reshape(args.num_of_frames,-1), dim=1))
     mask_ratio = torch.sqrt(torch.sum((torch.vstack(inputs)<1).reshape(args.num_of_frames,-1),dim=1) / max_mask)
@@ -217,6 +231,7 @@ def main(args):
 
     utils.log_input(inputs[0], args.output_dir)
     # print(inputs.shape)
+    # renderer = load_renderer(args, inputs, atlas, optic_flow=None)
     renderer = load_renderer(args, inputs, mask_ratio, atlas, optic_flow=None)
     # renderer = load_renderer(args, inputs, optic_flow)
     # renderer = load_renderer(args, inputs)
@@ -229,18 +244,19 @@ def main(args):
     min_delta = 1e-5
     terminate = False
 
-    renderer.set_random_noise(0)
+    # renderer.set_random_noise(0)
     # img = renderer.init_image(stage=0)
     # renderer.init_frames()
     # renderer.init_frames_flow()
     
     if args.focus == "foreground":
         index = renderer.init_frames_all()
+        # index = renderer.init_frames_random()
         atlas_paths=None
 
-    if args.focus == "background":
+    if args.focus == "background" or args.focus == 'atlas':
         index = None
-        atlas_paths = renderer.init_frames_atlas(1)
+        atlas_paths = renderer.init_frames_atlas()
 
     optimizer.init_optimizers()
 
@@ -250,7 +266,7 @@ def main(args):
     init_file = torch.load(args.checkpoint_path)
     ic(args.checkpoint_path)
 
-    if args.focus == "foreground":
+    if args.focus == "foreground" or args.focus == 'atlas':
         ic(args.focus)
         model_F_mapping = IMLP(
         input_dim=3,
@@ -290,13 +306,17 @@ def main(args):
 
     sketches = renderer.get_frames()
 
-    utils.save_sketches_video(sketches, f"{args.output_dir}/mp4_logs_{args.text}_{args.clip_model_name}_{''.join(str(x) for x in args.clip_conv_layer_weights)}", title=f"test.mp4")
+    utils.save_sketches_video(sketches, f"{args.output_dir}/mp4_logs_{args.text}_{args.clip_model_name}_{''.join(str(x) for x in args.clip_conv_layer_weights)}_{args.clip_fc_loss_weight}_{args.width}", title=f"test.mp4")
 
 
-    # tensor_image = ((atlas[1] - atlas[1].min()) / (atlas[1].max() - atlas[1].min())).squeeze(0).cpu()
+    # tensor_image = ((atlas[0] - atlas[0].min()) / (atlas[0].max() - atlas[0].min())).squeeze(0).cpu()
     # pil_image = Image.fromarray((tensor_image * 255).clamp(0, 255).byte().permute(1, 2, 0).numpy())
-    # pil_image.save(f"{args.output_dir}/mp4_logs/atlas.jpg")
-
+    # pil_image.save(f"{args.output_dir}/mp4_logs_{args.text}_{args.clip_model_name}_{''.join(str(x) for x in args.clip_conv_layer_weights)}_{args.clip_fc_loss_weight}_{args.width}/atlas.jpg")
+    
+    directory = Path(f"{args.output_dir}/atlas_logs_{args.text}_{args.clip_model_name}_{''.join(str(x) for x in args.clip_conv_layer_weights)}_{args.clip_fc_loss_weight}_{args.width}")
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    utils.save_atlas(atlas, model_F_mapping, renderer.frames_shapes, visual_point, colors, 2000, f"{args.output_dir}/atlas_logs_{args.text}_{args.clip_model_name}_{''.join(str(x) for x in args.clip_conv_layer_weights)}_{args.clip_fc_loss_weight}_{args.width}/init.jpg", args.device)
 
     for i in tqdm(range(300)):
         loss = torch.tensor([0.]).to(args.device)
@@ -311,7 +331,7 @@ def main(args):
         # loss += loss_addition.loss_init_atlas(renderer.frames_shapes, atlas_paths, model_F_mapping1, args.device)
         if args.focus == "foreground":
             loss += Loss_add.loss_init_inputs()
-        if args.focus == "background":
+        if args.focus == "background" or args.focus == "atlas":
             loss += Loss_add.loss_init_atlas()
         loss.backward()
         optimizer.step_()
@@ -325,12 +345,14 @@ def main(args):
         #     if not os.path.exists(directory):
         #         os.makedirs(directory)
         #     renderer.save_svgs(directory, f"svg_iter{i}")
-    
 
-    renderer.set_sparse()
+    renderer.set_sparse(10)
+
+
+    utils.save_atlas(atlas, model_F_mapping, renderer.frames_shapes, visual_point, colors, 5000, f"{args.output_dir}/atlas_logs_{args.text}_{args.clip_model_name}_{''.join(str(x) for x in args.clip_conv_layer_weights)}_{args.clip_fc_loss_weight}_{args.width}/warmup.jpg", args.device)
 
     sketches = renderer.get_frames()
-    utils.save_sketches_video(sketches, f"{args.output_dir}/mp4_logs_{args.text}_{args.clip_model_name}_{''.join(str(x) for x in args.clip_conv_layer_weights)}", title=f"init.mp4") 
+    utils.save_sketches_video(sketches, f"{args.output_dir}/mp4_logs_{args.text}_{args.clip_model_name}_{''.join(str(x) for x in args.clip_conv_layer_weights)}_{args.clip_fc_loss_weight}_{args.width}", title=f"init.mp4") 
 
     # mark_points = renderer.mark_shapes()
     # max_mask = torch.max(torch.sum((torch.vstack(inputs)<1).reshape(args.num_of_frames,-1), dim=1))
@@ -390,9 +412,9 @@ def main(args):
             # losses_consist += Loss_add.loss_con_()
         
         if args.clip_model_name == "RN101":
-            num = 15
+            num = 22
         if args.clip_model_name == "ViT-B/32":
-            num = 30
+            num = 49
 
         # losses_clips = []
         # torch.max(torch.vstack(sketches)
@@ -452,16 +474,21 @@ def main(args):
         # if epoch == 0:
         #     utils.plot_batch(inputs[0], sketches[0], f"{args.output_dir}", counter,
         #                      use_wandb=args.use_wandb, title=f"the_first.jpg")
+        if epoch > 0 and epoch % 10 == 0:
+            logging.info(f"----------{epoch}------------")
+            logging.info(f"loss: {loss}")
+            logging.info(f"losses_consist: {losses_consist}")
+            logging.info(f"losses_clip: {losses_clip}")
 
         if epoch > 0 and epoch % args.save_interval == 0:
-            logging.info(f"----------{epoch}------------")
+            # logging.info(f"----------{epoch}------------")
             print(f"----------{epoch}------------")
-            logging.info(f"loss: {loss}")
+            # logging.info(f"loss: {loss}")
             print(f"loss: {loss}")
             # print(f"losses_dist: {args.dist_param*losses_dist}")
-            logging.info(f"losses_consist: {losses_consist}")
+            # logging.info(f"losses_consist: {losses_consist}")
             print(f"losses_consist: {losses_consist}")
-            logging.info(f"losses_clip: {losses_clip}")
+            # logging.info(f"losses_clip: {losses_clip}")
             print(f"losses_clip: {losses_clip}")
             # logging.info(f"losses_frames: {losses_frames}")
             # print(f"losses_frames: {losses_frames}")
@@ -474,8 +501,15 @@ def main(args):
             #                  use_wandb=args.use_wandb, title=f"iter{epoch}.jpg")
             # renderer.save_svg(
             #     f"{args.output_dir}/svg_logs", f"svg_iter{epoch}")
-            utils.save_sketches_video(sketches, f"{args.output_dir}/mp4_logs_{args.text}_{args.clip_model_name}_{''.join(str(x) for x in args.clip_conv_layer_weights)}", title=f"iter{epoch}.mp4")
-            directory=f"{args.output_dir}/svg_logs_{args.text}_{args.clip_model_name}_{''.join(str(x) for x in args.clip_conv_layer_weights)}/{epoch}"
+
+
+            # utils.save_atlas(atlas, model_F_mapping, renderer.frames_shapes(), visual_point, 5000, f"{args.output_dir}/atlas_logs_{args.text}_{args.clip_model_name}_{''.join(str(x) for x in args.clip_conv_layer_weights)}_{args.clip_fc_loss_weight}_{args.width}/{epoch}.jpg" )
+
+            utils.save_atlas(atlas, model_F_mapping, renderer.frames_shapes, visual_point, colors, 2000, f"{args.output_dir}/atlas_logs_{args.text}_{args.clip_model_name}_{''.join(str(x) for x in args.clip_conv_layer_weights)}_{args.clip_fc_loss_weight}_{args.width}/{epoch}.jpg", args.device)
+
+
+            utils.save_sketches_video(sketches, f"{args.output_dir}/mp4_logs_{args.text}_{args.clip_model_name}_{''.join(str(x) for x in args.clip_conv_layer_weights)}_{args.clip_fc_loss_weight}_{args.width}", title=f"iter{epoch}.mp4")
+            directory=f"{args.output_dir}/svg_logs_{args.text}_{args.clip_model_name}_{''.join(str(x) for x in args.clip_conv_layer_weights)}_{args.clip_fc_loss_weight}_{args.width}/{epoch}"
             if not os.path.exists(directory):
                 os.makedirs(directory)
             renderer.save_svgs(directory, f"svg_iter{epoch}")
@@ -570,8 +604,8 @@ def main(args):
 
 
             sketches = renderer.get_frames()
-            utils.save_sketches_video(sketches, f"{args.output_dir}/mp4_logs_{args.text}_{args.clip_model_name}_{''.join(str(x) for x in args.clip_conv_layer_weights)}", title=f"iter{epoch}.mp4")
-            directory=f"{args.output_dir}/svg_logs_{args.text}_{args.clip_model_name}_{''.join(str(x) for x in args.clip_conv_layer_weights)}/{epoch}"
+            utils.save_sketches_video(sketches, f"{args.output_dir}/mp4_logs_{args.text}_{args.clip_model_name}_{''.join(str(x) for x in args.clip_conv_layer_weights)}_{args.clip_fc_loss_weight}_{args.width}", title=f"iter{epoch}.mp4")
+            directory=f"{args.output_dir}/svg_logs_{args.text}_{args.clip_model_name}_{''.join(str(x) for x in args.clip_conv_layer_weights)}_{args.clip_fc_loss_weight}_{args.width}/{epoch}"
             if not os.path.exists(directory):
                 os.makedirs(directory)
             renderer.save_svgs(directory, f"svg_iter_consist_{epoch}")

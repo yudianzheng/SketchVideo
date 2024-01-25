@@ -5,8 +5,6 @@ import numpy as np
 import re
 import argparse
 import os
-import cairosvg
-
 
 def combinesvgs(fore_dir, back_dir, mask_dir, result_folder, frame):
     bg_paths, bg_attributes, svg_attributes = svg.svg2paths2(back_dir)
@@ -124,9 +122,3 @@ if __name__ == "__main__":
     mask_list = sorted(os.listdir(args.masks_folder))
     for i in range(len(fore_list)):
         combinesvgs(f"{args.foresvgs_folder}/{fore_list[i]}", f"{args.backsvgs_folder}/{back_list[i]}", f"{args.masks_folder}/{mask_list[i]}", args.results_folder, i)
-
-    
-
-
-# image = cairosvg.svg2png("output3.svg")
-# ic(image)

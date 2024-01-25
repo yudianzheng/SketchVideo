@@ -344,7 +344,7 @@ class CLIP(nn.Module):
         return self.visual.conv1.weight.dtype
 
     def encode_image(self, image):
-        return self.visual(image.type(self.dtype)) # 245(49x5) x 512
+        return self.visual(image.type(self.dtype))
 
     def encode_text(self, text):
         x = self.token_embedding(text).type(self.dtype)  # [batch_size, n_ctx, d_model]

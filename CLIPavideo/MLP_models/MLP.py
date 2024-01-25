@@ -87,13 +87,22 @@ def init_weights(m):
         m.bias.data.fill_(0.01)
     
 class WidthMLP(nn.Module):
-    def __init__(self, num_strokes, num_cp, width_optim=False):
+    def __init__(self, num_strokes, num_cp, width_optim=False, use_positional=1, positional_dim=10):
         super().__init__()
         outdim = 1000
         self.width_optim = width_optim
+        self.use_positional = use_positional
+        if use_positional:
+            encoding_dimensions = 2 * positional_dim
+            self.b = torch.tensor([(2 ** j) * np.pi for j in range(positional_dim)],requires_grad = False)
+        else:
+            encoding_dimensions = 1
 
         self.layers_width = nn.Sequential(
-            nn.Linear(num_strokes+1, outdim),
+            # nn.Linear(num_strokes+1, outdim),
+            nn.Linear(encoding_dimensions,outdim),
+            # nn.SELU(inplace=True),
+            # nn.Linear(num_strokes, outdim),
             nn.SELU(inplace=True),
             nn.Linear(outdim, outdim),
             nn.SELU(inplace=True),
@@ -101,6 +110,11 @@ class WidthMLP(nn.Module):
             nn.Sigmoid()
         )
 
-    def forward(self, widths=None):
+    def forward(self, x=None):
         '''Forward pass'''
-        return self.layers_width(widths)
+        if self.use_positional:
+            if self.b.device!=x.device:
+                self.b=self.b.to(x.device)
+            pos = positionalEncoding_vec(x,self.b)
+            x = pos
+        return self.layers_width(x)

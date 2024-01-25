@@ -18,6 +18,7 @@ import copy
 import random
 from icecream import ic
 from MLP_models.MLP import WidthMLP, init_weights
+import os
 
 
 class Painter(torch.nn.Module):
@@ -94,23 +95,33 @@ class Painter(torch.nn.Module):
         # self.strokes_counter = 0 # counts the number of calls to "get_path"        
         # self.epoch = 0
         # self.final_epoch = args.num_iter - 1
+        # tensor_image = ((atlas[0] - atlas[0].min()) / (atlas[0].max() - atlas[0].min())).squeeze(0).cpu()
+        # pil_image = Image.fromarray((tensor_image * 255).clamp(0, 255).byte().permute(1, 2, 0).numpy())
+        # pil_image.save(f"{self.args.output_dir}/mp4_logs_{self.args.text}_{self.args.clip_model_name}_{''.join(str(x) for x in self.args.clip_conv_layer_weights)}_{self.args.clip_fc_loss_weight}_{self.args.width}/atlas1.jpg")
+
 
         self.image_atlas_attn_clip = self.define_attention_input(atlas)
         self.image_input_attn_clip = self.define_attention_input(target_im)
         self.mask = mask
+        
+        # tensor_image = ((self.image_atlas_attn_clip[0] - self.image_atlas_attn_clip[0].min()) / (self.image_atlas_attn_clip[0].max() - self.image_atlas_attn_clip[0].min())).squeeze(0).cpu()
+        # pil_image = Image.fromarray((tensor_image * 255).clamp(0, 255).byte().permute(1, 2, 0).numpy())
+        # pil_image.save(f"{self.args.output_dir}/mp4_logs_{self.args.text}_{self.args.clip_model_name}_{''.join(str(x) for x in self.args.clip_conv_layer_weights)}_{self.args.clip_fc_loss_weight}_{self.args.width}/atlas2.jpg")
+
         # self.attention_map = self.set_attention_map() if self.attention_init else None
         # ic(self.image_atlas_attn_clip)
-        self.attenion_atlas_map = self.clip_attn(self.image_atlas_attn_clip) if self.attention_init else None
-        self.attenion_input_map = self.clip_attn(self.image_input_attn_clip) if self.attention_init else None
-        
+        self.attention_atlas_map = self.clip_attn(self.image_atlas_attn_clip) if self.attention_init else None
+        self.attention_input_map = self.clip_attn(self.image_input_attn_clip) if self.attention_init else None
+
+
         # self.thresh = self.set_attention_threshold_map() if self.attention_init else None
         # self.thresh, _, self.inds_normalised_atlas = self.set_inds_clip(self.attenion_atlas_map, "atlas") if self.attention_init else None
         # self.thresh, self.inds_normalised_input_index, self.inds_normalised_input = self.set_inds_clip(self.attenion_input_map, "input") if self.attention_init else None
-        self.thresh, self.inds_normalised_list_atlas = self.set_inds_clip(self.attenion_atlas_map, "atlas") if self.attention_init else None
-        self.thresh, self.inds_normalised_list_input = self.set_inds_clip(self.attenion_input_map, "input") if self.attention_init else None
-
-        self.inds_normalised_list_input = self.set_random_init()
-
+        self.thresh, self.inds_normalised_list_atlas = self.set_inds_clip(self.attention_atlas_map, "atlas") if self.attention_init else None
+        self.thresh, self.inds_normalised_list_input = self.set_inds_clip(self.attention_input_map, "input") if self.attention_init else None
+        
+        # self.inds_normalised_list_input = self.set_random_init()
+        
         self.strokes_counter = 0 # counts the number of calls to "get_path"        
         self.epoch = 0
         self.final_epoch = args.num_iter - 1
@@ -121,16 +132,16 @@ class Painter(torch.nn.Module):
         self.main_on = 1
         self.paths4Frames = torch.zeros((self.num_frames)).to(device)
 
-        # self.plot()
+        self.plot(45)
 
-    def plot(self):
+    def plot(self,i):
         plt.figure(figsize=(10, 5))
-        threshold_map = self.thresh
+        threshold_map = self.thresh[i]
         threshold_map_ = (threshold_map - threshold_map.min()) / \
         (threshold_map.max() - threshold_map.min())
         plt.imshow(threshold_map_, interpolation='nearest', vmin=0, vmax=1)
         plt.title("prob softmax")
-        plt.scatter(self.inds[:, 1], self.inds[:, 0], s=10, c='red', marker='o')
+        # plt.scatter(self.inds[:, 1], self.inds[:, 0], s=10, c='red', marker='o')
         plt.axis("off")
         plt.savefig(self.args.output_dir)
         plt.close()
@@ -483,7 +494,7 @@ class Painter(torch.nn.Module):
         self.apply_same()
 
         for i in range(self.num_frames):
-            for j in path in range(self.num_paths):
+            for j in range(self.num_paths):
                 self.frames_shapes[i][j].stroke_width = torch.tensor(self.ratio[i]*self.args.width)
 
         return frames_paths
@@ -498,7 +509,7 @@ class Painter(torch.nn.Module):
         for i in range(self.num_paths):
             self.num_control_points = torch.zeros(self.num_segments, dtype = torch.int32) + (self.control_points_per_seg - 2)
             # p0 = self.inds_normalised_list_atlas[frame][self.strokes_counter] if self.attention_init else (random.random(), random.random())
-            p0 = self.inds_normalised_atlas[self.strokes_counter] if self.attention_init else (random.random(), random.random())
+            p0 = self.inds_normalised_list_atlas[0][self.strokes_counter] if self.attention_init else (random.random(), random.random())
             points.append(copy.deepcopy(p0))
             for j in range(self.control_points_per_seg - 1):
                 # p1 = (p0[0] + radius * (random.random() - 0.5), p0[1] + radius * (random.random() - 0.5))
@@ -567,7 +578,7 @@ class Painter(torch.nn.Module):
         return indexes
     
     def init_frames_random(self):
-        indexes = []
+        # indexes = []
         for num in range(self.num_frames):
             self.strokes_counter = 0
             self.shape_groups = []
@@ -642,7 +653,7 @@ class Painter(torch.nn.Module):
         # ratio = [torch.sqrt(x / max(area)) for x in area]
         ratio = [torch.pow((x / max(area)),1/3) for x in area]
 
-        ic(ratio)
+        # ic(ratio)
 
         for i in range(self.num_frames):
             for j in range(self.num_paths):
@@ -747,7 +758,7 @@ class Painter(torch.nn.Module):
                                 is_closed = False)
         self.strokes_counter += 1
         return path
-    
+
     def get_inds_path(self,num):
         points = []
         self.num_control_points = torch.zeros(self.num_segments, dtype = torch.int32) + (self.control_points_per_seg - 2)
@@ -775,7 +786,6 @@ class Painter(torch.nn.Module):
                                 is_closed = False)
         self.strokes_counter += 1
         return path, num
-
 
     def get_images_path(self):
         points = []
@@ -1348,10 +1358,22 @@ class Painter(torch.nn.Module):
     #         self.inds_normalised_list.append(copy.deepcopy(self.inds_normalised))
     #     return attn_maps_soft
 
+# plt.figure(figsize=(10, 5))
+#         threshold_map = self.attention_atlas_map[0]
+#         threshold_map_ = (threshold_map - threshold_map.min()) / \
+#         (threshold_map.max() - threshold_map.min())
+#         plt.imshow(threshold_map_, interpolation='nearest', vmin=0, vmax=1)
+#         plt.title("attnetion_atlas")
+#         # plt.scatter(self.inds[:, 1], self.inds[:, 0], s=10, c='red', marker='o')
+#         # plt.axis("off")
+#         plt.savefig(self.args.output_dir)
+#         plt.close()
+
     def set_inds_clip(self, attention_map, mode):
         # self.inds_list = []
         inds_normalised_list = []
         attn_maps_soft = []
+        # attention_map 
         for i, attention in enumerate(attention_map):
             attn_map = (attention - attention.min()) / (attention.max() - attention.min())
             if self.xdog_intersec:
@@ -1368,9 +1390,38 @@ class Painter(torch.nn.Module):
             attn_maps_soft.append(attn_map_soft)
 
             k = self.num_stages * self.num_paths
+            # ic(sum(attn_map_soft.flatten()>0))
+            # ic(self.args.output_dir)
+            # if not os.path.exists(self.args.output_dir):
+            #     os.mkdir(self.args.output_dir)
+            if sum(attn_map_soft.flatten()>0) < 100:
+                inds_normalised_list.append(copy.deepcopy(self.inds_normalised))
+                continue
+
+
+            # plt.figure(figsize=(10, 5))
+            # threshold_map = attn_map_soft
+            # threshold_map_ = (threshold_map - threshold_map.min()) / \
+            # (threshold_map.max() - threshold_map.min())
+            # plt.imshow(threshold_map_, interpolation='nearest', vmin=0, vmax=1)
+            # plt.savefig(self.args.output_dir)
+            # plt.close()
+
             self.inds = np.random.choice(range(attn_map.flatten().shape[0]), size=k, replace=False, p=attn_map_soft.flatten())
             self.inds = np.array(np.unravel_index(self.inds, attn_map.shape)).T
             # self.inds_list.append(copy.deepcopy(self.inds))
+
+            # plt.figure(figsize=(10, 5))
+            # threshold_map = attn_map_soft
+            # threshold_map_ = (threshold_map - threshold_map.min()) / \
+            # (threshold_map.max() - threshold_map.min())
+            # plt.imshow(threshold_map_, interpolation='nearest', vmin=0, vmax=1)
+            # plt.title("newest")
+            # plt.scatter(self.inds[:, 1], self.inds[:, 0], s=10, c='red', marker='o')
+            # plt.axis("off")
+            # plt.savefig(self.args.output_dir)
+            # plt.close()
+
         
             self.inds_normalised = np.zeros(self.inds.shape)
             self.inds_normalised[:, 0] =  self.inds[:, 1] / self.canvas_width
@@ -1383,10 +1434,10 @@ class Painter(torch.nn.Module):
         inds_normalised_list = []
         for i in range(self.args.num_of_frames):
             inds_normalised = np.zeros(self.inds.shape)
-            inds_normalised[:,0] = random.randint(0,224) / self.canvas_width
-            inds_normalised[:,1] = random.randint(0,224) / self.canvas_height
+            inds_normalised[:,0] = np.random.randint(0, 224, self.num_paths) / self.canvas_width
+            inds_normalised[:,1] = np.random.randint(0, 224, self.num_paths) / self.canvas_height
             inds_normalised = inds_normalised.tolist()
-            inds_normalised_list.append(copy.deepcopy(self.inds_normalised))
+            inds_normalised_list.append(copy.deepcopy(inds_normalised))
 
         return inds_normalised_list
 

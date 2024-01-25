@@ -144,65 +144,36 @@ class LossAddition(nn.Module):
         loss += torch.sum(torch.abs(uv_current[:,1] - uv_near[:,1]))
 
         return loss
-
-    def loss_consist_wMask1(self):
-        loss_1 = torch.tensor([0.]).to(self.device)
-        loss = torch.tensor([0.]).to(self.device)
-
-        consist_mask = self.masks[self.f_near_consist).long(), self.xy_near[:,1].long()
-        
-
-        xy_current = torch.vstack(self.xy_current_consist)
-        xyf_current = torch.stack((xy_current[:,0]/(224/2)-1, xy_current[:,1]/(224/2)-1, (self.f_current_consist/(self.frames_num/2)-1).detach()),dim=1).to(self.device)
-
-        xy_near = torch.vstack(self.xy_near_consist)
-        xyf_near = torch.stack((xy_near[:,0]/(224/2)-1, xy_near[:,1]/(224/2)-1, (self.f_near_consist/(self.frames_num/2)-1).detach()),dim=1).to(self.device)
-
-        consist_mask = self.masks[(self.f_near_consist).long(), xy_near[:,1].long(), xy_near[:,0].long()]
-        # neighbor_mask = torch.ones((consist_mask).shape).to(self.device) - consist_mask
-
-        uv_current = self.model(xyf_current)
-        uv_near = self.model(xyf_near)
-
-        loss += torch.sum(torch.abs(uv_current[:,0] - uv_near[:,0])*consist_mask)
-        loss += torch.sum(torch.abs(uv_current[:,1] - uv_near[:,1])*consist_mask)
-
-        # loss += torch.sum(torch.abs(uv_current[:,0] - uv_near[:,0]))
-        # loss += torch.sum(torch.abs(uv_current[:,1] - uv_near[:,1]))
-        # ic(loss_1)
-        # ic(loss)
-        # loss += torch.sum(torch.abs(torch.vstack(self.xy_current_consist)[:,0]-torch.vstack(self.xy_near_consist)[:,0].detach())*neighbor_mask)
-        # loss += torch.sum(torch.abs(torch.vstack(self.xy_current_consist)[:,1]-torch.vstack(self.xy_near_consist)[:,1].detach())*neighbor_mask)
-
-        return loss
     
-    def loss_consist_wMask(self):
-        loss_1 = torch.tensor([0.]).to(self.device)
-        loss = torch.tensor([0.]).to(self.device)
+    # def loss_consist_wMask(self):
+    #     # loss_1 = torch.tensor([0.]).to(self.device)
+    #     loss = torch.tensor([0.]).to(self.device)
 
-        xy_current = torch.vstack(self.xy_current_consist)
-        xyf_current = torch.stack((xy_current[:,0]/(224/2)-1, xy_current[:,1]/(224/2)-1, (self.f_current_consist/(self.frames_num/2)-1).detach()),dim=1).to(self.device)
+    #     xy_current = torch.vstack(self.xy_current_consist)
+    #     xyf_current = torch.stack((xy_current[:,0]/(224/2)-1, xy_current[:,1]/(224/2)-1, (self.f_current_consist/(self.frames_num/2)-1).detach()),dim=1).to(self.device)
 
-        xy_near = torch.vstack(self.xy_near_consist)
-        xyf_near = torch.stack((xy_near[:,0]/(224/2)-1, xy_near[:,1]/(224/2)-1, (self.f_near_consist/(self.frames_num/2)-1).detach()),dim=1).to(self.device)
+    #     xy_near = torch.vstack(self.xy_near_consist)
+    #     xyf_near = torch.stack((xy_near[:,0]/(224/2)-1, xy_near[:,1]/(224/2)-1, (self.f_near_consist/(self.frames_num/2)-1).detach()),dim=1).to(self.device)
 
-        consist_mask = self.masks[(self.f_near_consist).long(), xy_near[:,1].long(), xy_near[:,0].long()]
-        # neighbor_mask = torch.ones((consist_mask).shape).to(self.device) - consist_mask
+    #     consist_mask = self.masks[(self.f_near_consist).long(), xy_near[:,1].long(), xy_near[:,0].long()]
+    #     # neighbor_mask = torch.ones((consist_mask).shape).to(self.device) - consist_mask
 
-        uv_current = self.model(xyf_current)
-        uv_near = self.model(xyf_near)
+    #     xyf = xyf_current[consist_mask!=0]
+    #     xyf_ = xyf_near[consist_mask!=0]
+    #     uv_current = self.model(xyf)
+    #     uv_near = self.model(xyf_)
 
-        loss += torch.sum(torch.abs(uv_current[:,0] - uv_near[:,0])*consist_mask)
-        loss += torch.sum(torch.abs(uv_current[:,1] - uv_near[:,1])*consist_mask)
+    #     # loss += torch.sum(torch.abs(uv_current[:,0] - uv_near[:,0])*consist_mask)
+    #     # loss += torch.sum(torch.abs(uv_current[:,1] - uv_near[:,1])*consist_mask)
 
-        # loss += torch.sum(torch.abs(uv_current[:,0] - uv_near[:,0]))
-        # loss += torch.sum(torch.abs(uv_current[:,1] - uv_near[:,1]))
-        # ic(loss_1)
-        # ic(loss)
-        # loss += torch.sum(torch.abs(torch.vstack(self.xy_current_consist)[:,0]-torch.vstack(self.xy_near_consist)[:,0].detach())*neighbor_mask)
-        # loss += torch.sum(torch.abs(torch.vstack(self.xy_current_consist)[:,1]-torch.vstack(self.xy_near_consist)[:,1].detach())*neighbor_mask)
+    #     loss += torch.sum(torch.abs(uv_current[:,0] - uv_near[:,0].detach()))
+    #     loss += torch.sum(torch.abs(uv_current[:,1] - uv_near[:,1].detach()))
+    #     # ic(loss_1)
+    #     # ic(loss)
+    #     # loss += torch.sum(torch.abs(torch.vstack(self.xy_current_consist)[:,0]-torch.vstack(self.xy_near_consist)[:,0].detach())*neighbor_mask)
+    #     # loss += torch.sum(torch.abs(torch.vstack(self.xy_current_consist)[:,1]-torch.vstack(self.xy_near_consist)[:,1].detach())*neighbor_mask)
 
-        return loss
+    #     return loss
     
     def loss_con_(self):
         loss = torch.tensor([0.]).to(self.device)
