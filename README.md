@@ -31,8 +31,8 @@ sh scripts/install.sh
 ```bash
 # (1.1) install NLA
 sh scripts/install_atlas.sh
-# (1.2) install diffvg(optimize the example models)
-sh scripts/install_diffvg.sh
+# (1.2) install diffvg and CLIP(optimize the example models)
+sh scripts/install_clipavideo.sh
 ```
 
 ##### (2) download Dataset or take your own data(less than 70 frames,and extract masks), put on the folder <data>:
@@ -58,7 +58,7 @@ sh scripts/operate_atlas.sh <video_name>
 ```
 The trained models should be located at 'data/dataset/<video_name>/results/<epoch_num>' and 'data/dataset/<video_name>/results/checkpoint'.
 
-##### (5)compute our method:
+##### (5)compute our method with trained models(eg. mallard-water, scooter-gray, and soapbox):
 
 ```bash
 sh scripts/operate_clipavideo.sh <video_name>
