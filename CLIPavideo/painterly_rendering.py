@@ -54,7 +54,7 @@ def load_renderer(args, target_im=None, ratio=None, atlas=None, optic_flow=None,
 def get_frames(args):
     frames = []
     im_list = sorted(os.listdir(args.frames_dir))[:args.num_of_frames]
-    print(im_list)
+    # print(im_list)
     img_size = (224, 224)
     for i in im_list:
         im_name = os.path.join(args.frames_dir+i)
@@ -71,7 +71,7 @@ def get_frames(args):
 def get_masks(args):
     masks = []
     im_list = natsorted(os.listdir(args.masks_dir))[:args.num_of_frames]
-    print(im_list)
+    # print(im_list)
     img_size = (224, 224)
     for i in im_list:
         im_name = os.path.join(args.masks_dir+i)
