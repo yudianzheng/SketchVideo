@@ -1,7 +1,5 @@
 eval "$(conda shell.bash hook)"
 
-git submodule update --init --recursive
-
 conda create -n clipavideo python=3.7.5 tensorflow=1.15
 conda activate clipavideo
 
