@@ -1,6 +1,6 @@
 eval "$(conda shell.bash hook)"
 
-conda create -n atlas python=3.7.5 tensorflow=1.15
+conda create -n atlas python=3.7.5 tensorflow=1.15 -y
 conda activate atlas
 
 conda install -y pytorch==1.12.1 torchvision==0.13.1 torchaudio==0.12.1 cudatoolkit=11.3 -c pytorch
