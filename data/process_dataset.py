@@ -135,7 +135,7 @@ for video_name in imgs_folder_names:
         filling = np.any(cropped == 0, axis=-1)
         cropped[filling] = [255,255,255]
 
-        mask = cv2.resize(mask, (size[0], size[1]))
+        mask = cv2.resize(mask, (size[0], size[1]))[:,:,0]
         img = cv2.resize(img,  (size[0], size[1]))
         cropped = cv2.resize(cropped, (size[0], size[1]))
 
@@ -150,9 +150,12 @@ for video_name in imgs_folder_names:
             os.makedirs(f"{output_folder}/{video_name}/imgs_crop_fore")
         if not os.path.exists(f"{output_folder}/{video_name}/masks_crop"):
             os.makedirs(f"{output_folder}/{video_name}/masks_crop")
+        if not os.path.exists(f"{output_folder}/{video_name}/imgs_crop_maskrcnn"):
+            os.makedirs(f"{output_folder}/{video_name}/imgs_crop_maskrcnn")
 
         cv2.imwrite(os.path.join(f"{output_folder}/{video_name}/masks/{mask_name}"), whole_mask)
         cv2.imwrite(os.path.join(f"{output_folder}/{video_name}/imgs/{img_name}"), whole_img)
         cv2.imwrite(os.path.join(f"{output_folder}/{video_name}/imgs_crop/{img_name}"), img)
         cv2.imwrite(os.path.join(f"{output_folder}/{video_name}/masks_crop/{img_name}"), mask)
+        cv2.imwrite(os.path.join(f"{output_folder}/{video_name}/imgs_crop_maskrcnn/{img_name}"), mask)
         cv2.imwrite(os.path.join(f"{output_folder}/{video_name}/imgs_crop_fore/{img_name}"), cropped)
