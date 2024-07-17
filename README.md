@@ -2,7 +2,7 @@
 
 [Yudian Zheng](https://github.com/yudianzheng/) · [Xiaodong Cun](http://vinthony.github.io/) · [Menghan Xia](https://menghanxia.github.io/) · [Chi-Man Pun](https://www.cis.um.edu.mo/~cmpun/)
 
-<a href='https://onlinelibrary.wiley.com/doi/abs/10.1111/cgf.15044'><img src='https://img.shields.io/badge/cgf-yellow'></a> 
+<a href='https://onlinelibrary.wiley.com/doi/abs/10.1111/cgf.15044'><img src='https://img.shields.io/badge/CGF-Paper-yellow'></a> 
 <a href='https://arxiv.org/abs/2311.15306'><img src='https://img.shields.io/badge/ArXiv-2311.15306-red'></a> 
 <a href='https://sketchvideo.github.io/'><img src='https://img.shields.io/badge/Project-Page-Green'></a>
 <a href='https://youtu.be/tT9F1RSITuU'><img src='https://img.shields.io/badge/Youtube-Video-blue'></a>
